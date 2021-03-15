@@ -1,0 +1,34 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Deploy to k8s
+
+on: [ workflow_dispatch ]
+
+jobs:
+  deployment:
+    name: "Helm install"
+    runs-on: 'ubuntu-latest'
+    needs: [ dockerhub ]
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v1'
+      - name: 'Deploy'
+        uses: 'deliverybot/helm@master'
+        with:
+          namespace: springservice
+          release: springservice
+          token: '${{ github.token }}'
+          #          version: '${{ github.sha }}'
+          version: 'latest'
+          chart: './servicechart'
+          helm: helm3
+          timeout: 10m0s
+          value-files: "./servicechart/values.yaml"
+          values: |
+            image:
+              tag: "latest"
+            network:
+              host: ${{ secrets.KUBE_HOST }}
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
