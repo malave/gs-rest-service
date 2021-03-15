@@ -1,0 +1,9 @@
+name: springservice
+port: 8080
+image:
+  repository: malave/gs-rest-service
+  pullPolicy: Always
+  tag: "latest"
+network:
+  host: 161.35.247.245
+  tier: backend
