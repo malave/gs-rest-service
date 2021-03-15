@@ -71,7 +71,7 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
   deployment:
-    name: "Helm install [all]"
+    name: "Helm install"
     runs-on: 'ubuntu-latest'
     needs: [ dockerhub ]
     steps:
