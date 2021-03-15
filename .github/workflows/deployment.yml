@@ -43,7 +43,6 @@ jobs:
           tags: |
             malave/gs-rest-service:latest
             malave/gs-rest-service:${{ steps.tag.outputs.tag }}
-            malave/gs-rest-service:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
   deployment:
@@ -62,7 +61,7 @@ jobs:
           namespace: springservice
           release: springservice
           token: '${{ github.token }}'
-          version: '${{ github.ref }}'
+          version: '${{ steps.tag.outputs.tag }}'
           chart: './servicechart'
           helm: helm3
           value-files: "./servicechart/values.yaml"

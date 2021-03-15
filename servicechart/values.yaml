@@ -1,4 +1,6 @@
 name: springservice
+app:
+  version: local
 port: 8080
 image:
   repository: malave/gs-rest-service
