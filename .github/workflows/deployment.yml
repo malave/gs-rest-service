@@ -1,9 +1,11 @@
 # This workflow will build a Java project with Gradle
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
-name: Build and push to DockerHub
+name: Build Image and Deploy
 
-on: [ workflow_dispatch ]
+on:
+  release:
+    types: [ published ]
 
 jobs:
   dockerhub:
@@ -38,6 +40,7 @@ jobs:
           push: true
           tags: |
             malave/gs-rest-service:latest
+            malave/gs-rest-service:${{ github.ref }}
             malave/gs-rest-service:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -54,15 +57,14 @@ jobs:
           namespace: springservice
           release: springservice
           token: '${{ github.token }}'
-#          version: '${{ github.sha }}'
-          version: 'latest'
+          version: '${{ github.ref }}'
           chart: './servicechart'
           helm: helm3
           timeout: 10m0s
           value-files: "./servicechart/values.yaml"
           values: |
             image:
-              tag: "latest"
+              tag: "${{ github.ref }}"
             network:
               host: ${{ secrets.KUBE_HOST }}
         env:
