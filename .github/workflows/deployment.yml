@@ -14,6 +14,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
@@ -37,9 +40,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tag_with_ref: true
           tags: |
             malave/gs-rest-service:latest
+            malave/gs-rest-service:${{ steps.tag.outputs.tag }}
             malave/gs-rest-service:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -50,6 +53,9 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v1'
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
       - name: 'Deploy'
         uses: 'deliverybot/helm@master'
         with:
@@ -59,11 +65,10 @@ jobs:
           version: '${{ github.ref }}'
           chart: './servicechart'
           helm: helm3
-          timeout: 10m0s
           value-files: "./servicechart/values.yaml"
           values: |
             image:
-              tag: "${{ github.ref }}"
+              tag: "${{ steps.tag.outputs.tag }}"
             network:
               host: ${{ secrets.KUBE_HOST }}
         env:
