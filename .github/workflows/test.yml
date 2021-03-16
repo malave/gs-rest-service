@@ -46,7 +46,7 @@ jobs:
           run: chmod +x gradlew
         - name: Test
           run: ./gradlew pmdMain
-    pmd:
+    failsafe:
       runs-on: ubuntu-latest
       needs: [ build ]
       steps:
