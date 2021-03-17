@@ -1,4 +1,5 @@
 name: springservice
+env: dev
 app:
   version: local
 port: 8080
