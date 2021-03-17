@@ -35,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ env-check ]
     steps:
+      - name: "Prod Check"
+        run: echo "ENV= ${{ env.ENV }} | TAG= ${{ env.TAG }}"
       - name: Checkout
         uses: actions/checkout@v2
 
