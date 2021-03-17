@@ -10,30 +10,27 @@ on:
   push:
     branches: [ master ]
 env:
-  ENV: prod
-  TAG: latest
+  ENV: dev
+  TAG: ${{ github.sha }}
 jobs:
-  env-check:
-    name: "Env check"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Dev Check"
-        if:  ${{ !github.event.release }}
-        run: echo "Production environment"
-        env:
-          ENV: dev
-          TAG: ${{ github.sha }}
-
   build-docker:
     name: "Build/Push Docker Image"
     runs-on: ubuntu-latest
-    needs: [ env-check ]
     steps:
+      - name: Get tag
+        if: github.event.release
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+      - name: "Prod Check"
+        if: github.event.release
+        run: echo "Production environment"
+        env:
+          ENV: prod
+          TAG: ${{ steps.tag.outputs.tag }}
       - name: "Prod Check"
         run: echo "ENV= ${{ env.ENV }} | TAG= ${{ env.TAG }}"
       - name: Checkout
         uses: actions/checkout@v2
-
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
