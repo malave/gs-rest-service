@@ -56,10 +56,12 @@ jobs:
         uses: 'actions/checkout@v1'
       - name: "Prod Check"
         if: github.event.release
+        run: echo "Production environmet"
         env:
           ENV: prod
       - name: "Dev Check"
         if: github.event.push
+        run: echo "Dev environmet"
         env:
           ENV: dev
       - name: Get tag
