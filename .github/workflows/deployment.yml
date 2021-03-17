@@ -54,6 +54,14 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v1'
+      - name: "Prod Check"
+        if: github.event.release
+        env:
+          ENV: prod
+      - name: "Dev Check"
+        if: github.event.push
+        env:
+          ENV: dev
       - name: Get tag
         id: tag
         uses: dawidd6/action-get-tag@v1
@@ -68,7 +76,7 @@ jobs:
           helm: helm3
           value-files: "./servicechart/values.yaml"
           values: |
-            env: ${{ github.event.release ? "prod" : "dev" }}
+            env: ${{ env.ENV }}
             image:
               tag: "${{ steps.tag.outputs.tag }}"
             network:
