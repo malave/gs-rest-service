@@ -36,7 +36,7 @@ jobs:
     needs: [ env-check ]
     steps:
       - name: "Prod Check"
-        run: echo "ENV= ${{ env.ENV }} | TAG= ${{ env.TAG }}"
+        run: echo "ENV= ${{ jobs.env-check.env.ENV }} | TAG= ${{ jobs.env-check.env.TAG }}"
       - name: Checkout
         uses: actions/checkout@v2
 
