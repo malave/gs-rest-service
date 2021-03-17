@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.name }}
+  name: {{ include "app.name.deployment" . }}
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "app.labels" . | indent 4 }}
@@ -9,20 +9,17 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.name }}
+      app: {{ include "app.name.deployment" . }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: {{ .Values.name }}
+        app: {{ include "app.name.deployment" . }}
         tier: {{ .Values.network.tier }}
     spec:
       containers:
-        - name: {{ .Values.name }}
+        - name: {{ include "app.name.deployment" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: SERVER_SERVLET_CONTEXT_PATH
-              value: "/{{.Values.env}}"
       restartPolicy: Always

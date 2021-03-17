@@ -1,12 +1,11 @@
-name: springservice
-env: dev
+name: spring
 app:
   version: local
 port: 8080
 image:
   repository: malave/gs-rest-service
   pullPolicy: Always
-  tag: "0.0.6"
+  tag: latest
 network:
-  host: 161.35.247.245
+  host: localhost
   tier: backend

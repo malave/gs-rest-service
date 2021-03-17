@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-helm uninstall --namespace=springservice springservice
+helm uninstall --namespace=mdas mdas
 #kubectl delete ns scovey

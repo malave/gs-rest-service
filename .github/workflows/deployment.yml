@@ -4,33 +4,19 @@
 name: Build Image and Deploy
 
 on:
-  workflow_dispatch:
   release:
     types: [ published ]
-  push:
-    branches: [ master ]
-env:
-  ENV: dev
-  TAG: ${{ github.sha }}
+
 jobs:
   build-docker:
     name: "Build/Push Docker Image"
     runs-on: ubuntu-latest
     steps:
-      - name: Get tag
-        if: github.event.release
-        id: tag
-        uses: dawidd6/action-get-tag@v1
-      - name: "Production Check"
-        if: github.event.release
-        run: echo "Production environment"
-        env:
-          ENV: prod
-          TAG: ${{ steps.tag.outputs.tag }}
-      - name: "ENV Echo"
-        run: echo "ENV= ${{ env.ENV }} | TAG= ${{ env.TAG }}"
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
@@ -56,7 +42,7 @@ jobs:
           push: true
           tags: |
             malave/gs-rest-service:latest
-            malave/gs-rest-service:${{ env.TAG }}
+            malave/gs-rest-service:${{ steps.tag.outputs.tag }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
   deployment:
@@ -64,34 +50,24 @@ jobs:
     runs-on: 'ubuntu-latest'
     needs: [ build-docker ]
     steps:
-      - name: Get tag
-        if: github.event.release
-        id: deploy_tag
-        uses: dawidd6/action-get-tag@v1
-      - name: "Production Check"
-        if: github.event.release
-        run: echo "Production environment"
-        env:
-          ENV: prod
-          TAG: ${{ steps.deploy_tag.outputs.tag }}
-      - name: "ENV Echo"
-        run: echo "ENV= ${{ env.ENV }} | TAG= ${{ env.TAG }}"
       - name: 'Checkout'
         uses: 'actions/checkout@v1'
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
       - name: 'Deploy'
         uses: 'deliverybot/helm@master'
         with:
-          namespace: springservice
-          release: springservice
+          namespace: mdas
+          release: mdas
           token: '${{ github.token }}'
-          version: '${{ env.TAG }}'
+          version: '${{ steps.tag.outputs.tag }}'
           chart: './servicechart'
           helm: helm3
           value-files: "./servicechart/values.yaml"
           values: |
-            env: ${{ env.ENV }}
             image:
-              tag: "${{ env.TAG }}"
+              tag: "${{ steps.tag.outputs.tag }}"
             network:
               host: ${{ secrets.KUBE_HOST }}
         env:
