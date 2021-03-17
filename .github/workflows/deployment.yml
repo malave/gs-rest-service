@@ -19,13 +19,13 @@ jobs:
         id: tag
         uses: dawidd6/action-get-tag@v1
       - name: "Prod Check"
-        if: github.event.release
+        if:  ${{ github.event.release }}
         run: echo "Production environment"
         env:
           ENV: prod
           TAG: ${{ steps.tag.outputs.tag }}
       - name: "Dev Check"
-        if: github.event.push
+        if: ${{ !github.event.release }}
         run: echo "Development environment"
         env:
           ENV: dev
