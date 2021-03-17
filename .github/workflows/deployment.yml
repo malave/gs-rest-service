@@ -9,34 +9,28 @@ on:
     types: [ published ]
   push:
     branches: [ master ]
+env:
+  ENV: prod
+  TAG: latest
 jobs:
   env-check:
     name: "Env check"
     runs-on: ubuntu-latest
     steps:
-      - name: Get tag
-        if: github.event.release
-        id: tag
-        uses: dawidd6/action-get-tag@v1
-      - name: "Prod Check"
-        if:  ${{ github.event.release }}
-        run: echo "Production environment"
-        env:
-          ENV: prod
-          TAG: ${{ steps.tag.outputs.tag }}
       - name: "Dev Check"
-        if: ${{ !github.event.release }}
-        run: echo "Development environment"
+        if:  ${{ !github.event.release }}
+        run: echo "Production environment"
         env:
           ENV: dev
           TAG: ${{ github.sha }}
+
   build-docker:
     name: "Build/Push Docker Image"
     runs-on: ubuntu-latest
     needs: [ env-check ]
     steps:
       - name: "Prod Check"
-        run: echo "ENV= ${{ jobs.env-check.env.ENV }} | TAG= ${{ jobs.env-check.env.TAG }}"
+        run: echo "ENV= ${{ env.ENV }} | TAG= ${{ env.TAG }}"
       - name: Checkout
         uses: actions/checkout@v2
 
