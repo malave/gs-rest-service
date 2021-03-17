@@ -10,15 +10,33 @@ on:
   push:
     branches: [ master ]
 jobs:
+  env-check:
+    name: "Env check"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get tag
+        if: github.event.release
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+      - name: "Prod Check"
+        if: github.event.release
+        run: echo "Production environment"
+        env:
+          ENV: prod
+          TAG: ${{ steps.tag.outputs.tag }}
+      - name: "Dev Check"
+        if: github.event.push
+        run: echo "Development environment"
+        env:
+          ENV: dev
+          TAG: ${{ github.sha }}
   dockerhub:
     name: "Build Docker Hub Image"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Get tag
-        id: tag
-        uses: dawidd6/action-get-tag@v1
+
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
@@ -44,7 +62,7 @@ jobs:
           push: true
           tags: |
             malave/gs-rest-service:latest
-            malave/gs-rest-service:${{ steps.tag.outputs.tag }}
+            malave/gs-rest-service:${{ env.TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
   deployment:
@@ -54,16 +72,6 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v1'
-      - name: "Prod Check"
-        if: github.event.release
-        run: echo "Production environmet"
-        env:
-          ENV: prod
-      - name: "Dev Check"
-        if: github.event.push
-        run: echo "Dev environmet"
-        env:
-          ENV: dev
       - name: Get tag
         id: tag
         uses: dawidd6/action-get-tag@v1
@@ -73,14 +81,14 @@ jobs:
           namespace: springservice
           release: springservice
           token: '${{ github.token }}'
-          version: '${{ steps.tag.outputs.tag }}'
+          version: '${{ env.TAG }}'
           chart: './servicechart'
           helm: helm3
           value-files: "./servicechart/values.yaml"
           values: |
             env: ${{ env.ENV }}
             image:
-              tag: "${{ steps.tag.outputs.tag }}"
+              tag: "${{ env.TAG }}"
             network:
               host: ${{ secrets.KUBE_HOST }}
         env:
